@@ -83,6 +83,7 @@ end
 %w[aws-sdk trollop keystore].each do |gem|
   gem_package gem do
     # timeout 3600
+    # gem_binary "/usr/share/rvm/rubies/#{node['rvm']['default_ruby']}/bin/gem"
     retries 10
     retry_delay 10
     options '--no-user-install --no-ri --no-rdoc'
