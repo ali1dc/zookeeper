@@ -1,17 +1,23 @@
 {
   "variables": {
+    "source_ami": "",
+    "ami_name": "zookeeper-{{timestamp}}",
     "zk_1_ip": "10.100.1.100",
     "zk_2_ip": "10.100.2.100",
-    "zk_3_ip": "10.100.3.100"
+    "zk_3_ip": "10.100.3.100",
+    "vpc_id": "",
+    "subnet_id": "",
+    "security_group_id": "",
+    "region": "us-east-1"
   },
   "builders": [{
     "type": "amazon-ebs",
-    "region": "us-east-1",
-    "source_ami": "ami-43a15f3e",
-    "instance_type": "m5.xlarge",
+    "region": "{{user `region`}}",
+    "source_ami": "{{user `source_ami`}}",
+    "instance_type": "m4.2xlarge",
     "ssh_username": "ubuntu",
     "ssh_timeout": "5m",
-    "ami_name": "zookeeper-{{timestamp}}"
+    "ami_name": "{{user `ami_name`}}"
   }],
   "provisioners": [
     {
