@@ -1,5 +1,5 @@
 ---
-Description: ExDataLab Zookeeper ASG Deployment
+Description: Excella Streaming Platform Zookeeper ASG Deployment
 Parameters:
   VpcId:
     Description: VPC to deploy to
@@ -238,7 +238,7 @@ Resources:
         Value: Packer
         PropagateAtLaunch: true
       - Key: System
-        Value: ExDataLab
+        Value: XSP
         PropagateAtLaunch: true
       VPCZoneIdentifier:
         Ref: AsgSubnets
@@ -308,7 +308,7 @@ Outputs:
       - PrimaryPrivateIpAddress
   Environment:
     Description: Environment launched into
-    Value: ExDataLab
+    Value: XSP
   PipelineInstanceId:
     Description: Pipeline instance ID
     Value:
