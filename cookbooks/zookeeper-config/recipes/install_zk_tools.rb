@@ -82,8 +82,10 @@ end
 
 %w[aws-sdk trollop keystore].each do |gem|
   gem_package gem do
-    timeout 3600
-    options '--no-user-install'
+    # timeout 3600
+    retries 10
+    retry_delay 10
+    options '--no-user-install --no-ri --no-rdoc'
   end
 end
 
