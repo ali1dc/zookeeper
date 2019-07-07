@@ -1,3 +1,5 @@
+In this blog, I want to talk about a challenging task; deploying stateless Zookeeper on AWS. But before I deep dive, let's see what is Zookeeper, and why we need it!
+
 ## What is Zookeeper
 Zookeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services. All of these kinds of services are used in some form or another by distributed applications. Each time they are implemented there is a lot of work that goes into fixing the bugs and race conditions that are inevitable. Because of the difficulty of implementing these kinds of services, applications initially usually skimp on them, which make them brittle in the presence of change and difficult to manage. Even when done correctly, different implementations of these services lead to management complexity when the applications are deployed.
 
@@ -31,17 +33,17 @@ There are several options for addressing that challenge:
 4. Stateless Zookeeper
 
 ## What is stateless Zookeeper
-Stateless Zookeeper is the configuration and deployment of the Zookeeper cluster, that if a node got terminated, replaced node get the same node configuration and not loose any data. 
-In this section, I will tell you step by step how you can have a stateless Zookeeper cluster in Amazon Web Services, but lets have some assumptions:
+Stateless Zookeeper is the configuration and deployment of the Zookeeper cluster, that if a node got terminated, the replaced node get the same node configuration and not lose any data.
+In this section, I will tell you the step by step how you can have a stateless Zookeeper cluster in Amazon Web Services, but let's have some assumptions:
 1. We are hosting 3 node Zookeeper on `us-east-1` and each node in one Available Zone (AZ); `us-east-1a`, `us-east-1b` and `us-east-1c`.
 2. We are installing Zookeeper on EC2 instances. (each node on an EC2 instance)
 3. We are using Auto Scaling Group - ASG.
-4. We have an AMI images with installed Zookeeper on it. (We are using [Chef](https://www.chef.io/) to bake Zookeeper and all other tools for running it)
+4. We have an AMI image with Zookeeper on it. (We are using [Chef](https://www.chef.io/) to bake Zookeeper and all other tools for running it)
 
 ### Step 1: Leveraging ENI
-We need to create environment with static internal IP address, means if a node got replaced, the new one get the same IP address. With Elastic Network Interface - ENI, we can handle ENI attachment in a fairly simple method.
+We need to create an environment with the static internal IP addresses for the nodes, means if a node got replaced, the new one get the same IP address. With Elastic Network Interface - ENI, we can manage ENI attachment in a fairly uncomplicated manner.
 
-In ASG lunch configuration, we need to have a script to look for available ENI in the same AZ and attach it. Here is the ruby example:
+In ASG launch configuration, we need to have a script to look for available ENI in the same AZ and attach it. Here is the ruby example:
 ```ruby
 @ec2 = Aws::EC2::Client.new(region: region)
 metadata_endpoint = 'http://169.254.169.254/latest/meta-data/'
@@ -60,8 +62,7 @@ metadata_endpoint = 'http://169.254.169.254/latest/meta-data/'
 instance_id = Net::HTTP.get(URI.parse(metadata_endpoint + 'instance-id'))
 eni.attach(instance_id: instance_id, device_index: 1)
 ```
-
-At this point, the new network with the IP address that we know, is attached, but we cannot use that for communication yet! Unless we create network config and route, and make our new network device as the default. This can be handled by this shell script:
+At this point, the new network with the IP address that we know is attached, but we are not able to use it for communication yet! Unless we create a network config and route and make our new network device as the default. This can be managed by this shell script:
 ```sh
 #!/bin/bash -e
 export GATEWAY=`route -n | grep "^0.0.0.0" | tr -s " " | cut -f2 -d" "`
@@ -96,14 +97,13 @@ ip route add default via $GATEWAY dev eth1 table eth1_rt;
 ```
 
 These scripts can be run by Chef in the launch configuration.
-<!-- This is the most important piece of the stateless configuration. What if we somehow manage a node to get the same IP when it got replaced then we c -->
 
 ### Step 2: Leveraging EBS volume
-Let's see what the problem is first; if a node got terminated or replaced by another one, what is going to happen fo the data? What if we loose the data?
+Let's see what the problem is first if; a node got terminated or replaced by another one, what is going to happen for the data? What if we lose the data?
 
-Good news: nothing! Zookeeper is a fault tolerant system, means each node has the same data replicated.
-Bad news: after each node replacement we may have traffic in our network.
-Solution: use an extra EBS volume and set `Delete on termination` property to `false`, and attach it with the new replaced node. Here is a python code about how to do that:
+Good news: nothing going to happen! Zookeeper is a fault-tolerant and distributed system, means each node has the same data replicated.
+Bad news: after each node replacement we may have traffic in our network for replicating data to the new node.
+Solution: use an extra EBS volume and set `Delete on termination` property to `false`, and attach it with the new replaced node for storing the Zookeeper data. Here is a python code regarding how to do that:
 ```python
 conn = ec2.connect_to_region(region_name)
 
@@ -120,7 +120,7 @@ commands.getstatusoutput('mount /dev/xvdg /var/lib/zookeeper')
 ```
 <!-- ## How to make it Self-Healing -->
 ## Conclusion
-Configuring stateless Zookeeper may have it's own challenge, but still it is easier and less challenging than other options. Also we have more power to make it more fit into our organization. In addition, one great characteristic of this way, remained hidden so far! We did not talk about Self-Healing cluster, but, if we follow this pattern with some reasonable improvement, we can achieve that. 
+Configuring stateless Zookeeper may have its own challenge, but still, it is easier and less challenging than other options. Also, we have more power to make it more fit into our organization. In addition, one great characteristic of this way remained hidden so far! We did not talk about Self-Healing cluster, but, if we follow this pattern with some reasonable improvement, we can easily achieve that. 
 
 [Here](git@github.com:ali1dc/xd-zookeeper.git) you can find the source code for the Zookeeper configuration, ready for AWS deployment.
 
