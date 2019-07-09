@@ -1,4 +1,4 @@
-In this blog, I want to talk about a challenging task; deploying stateless Zookeeper on AWS. But before I deep dive, let's see what is Zookeeper, and why we need it!
+Zookeeper is an orchestration service, typically associated with distributed systems (think Hadoop or Kafka). Managing Zookeeper, especially in cloud environments can be a difficult and daunting task. In this blog post, I will address the challenge of deploying Zookeeper as a Service on AWS; but first, let's see what Zookeeper is, and why we need it!
 
 ## What is Zookeeper
 Zookeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services. All of these kinds of services are used in some form or another by distributed applications. Each time they are implemented there is a lot of work that goes into fixing the bugs and race conditions that are inevitable. Because of the difficulty of implementing these kinds of services, applications initially usually skimp on them, which make them brittle in the presence of change and difficult to manage. Even when done correctly, different implementations of these services lead to management complexity when the applications are deployed.
@@ -30,7 +30,7 @@ There are several options for addressing that challenge:
 1. Using [Consul](https://www.consul.io/discovery.html) service discovery by HashiCorp.
 2. Custom node discovery which can be complicated and challenging.
 3. Using [Exhibitor](https://github.com/soabase/exhibitor); a Zookeeper node management by Netflix.
-4. Stateless Zookeeper
+4. Zookeeper as a Service (aka Stateless Zookeeper)
 
 We will focus specifically on Zookeeper as a Service, or Stateless Zookeeper.
 
