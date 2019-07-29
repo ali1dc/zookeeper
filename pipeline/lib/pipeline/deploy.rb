@@ -86,7 +86,7 @@ module Pipeline
     end
 
     def stack_name
-      # "EXDATALAB-ZOOKEEPER-#{@params[:environment].upcase}"
+      # "XSP-ZOOKEEPER-#{@params[:environment].upcase}"
       @params[:stack_name]
     end
   end
