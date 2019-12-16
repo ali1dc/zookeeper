@@ -75,7 +75,7 @@ GEM
     eat (0.1.8)
       httpclient
     erubis (2.7.0)
-    excon (0.62.0)
+    excon (0.71.0)
     faraday (0.15.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.21)
